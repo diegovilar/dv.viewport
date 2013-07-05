@@ -1,4 +1,4 @@
-dv-viewport
+dv.viewport
 ===================
 
 Viewport utilities for AngularJS

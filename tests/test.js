@@ -5,7 +5,7 @@
 (function (angular, undefined) {
     "use strict";
 
-    var app = angular.module('TestApp', ['dvViewport']);
+    var app = angular.module('TestApp', ['dv.viewport']);
 
     app.controller("TestController", TestController);
 

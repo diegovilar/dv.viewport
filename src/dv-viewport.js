@@ -14,13 +14,13 @@
      * @constant
      * @type {!string}
      */
-    var MODULE_NAME = 'dvViewport';
+    var MODULE_NAME = 'dv.viewport';
 
     /**
      * @constant
      * @type {!string}
      */
-    var VIEWPORT_SERVICE_NAME = MODULE_NAME;
+    var VIEWPORT_SERVICE_NAME = 'dvViewport';
 
     /**
      * @constant

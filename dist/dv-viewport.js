@@ -1,7 +1,7 @@
 //noinspection JSCheckFunctionSignatures
 /**
- * dvViewport
- * https://github.com/diegovilar/dvViewport
+ * dv.viewport
+ * https://github.com/diegovilar/dv.viewport
  *
  * @version 0.9.0-alpha.1
  * @license BSD
@@ -14,13 +14,13 @@
      * @constant
      * @type {!string}
      */
-    var MODULE_NAME = 'dvViewport';
+    var MODULE_NAME = 'dv.viewport';
 
     /**
      * @constant
      * @type {!string}
      */
-    var VIEWPORT_SERVICE_NAME = MODULE_NAME;
+    var VIEWPORT_SERVICE_NAME = 'dvViewport';
 
     /**
      * @constant

@@ -5,7 +5,6 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        properties: grunt.file.readJSON('properties.json'),
 
         buildDir: './build',
         distDir: './dist',
@@ -51,9 +50,6 @@ module.exports = function (grunt) {
                     },{
                         from: "$PROJECT_LICENSE$",
                         to: "<%= pkg.license %>"
-                    },{
-                        from: "$MODULE_PREFIX$",
-                        to: "<%= properties.modulePrefix %>"
                     }
                 ]
             }

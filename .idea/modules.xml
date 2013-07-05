@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/dvViewport.iml" filepath="$PROJECT_DIR$/.idea/dvViewport.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/dv.viewport.iml" filepath="$PROJECT_DIR$/.idea/dv.viewport.iml" />
     </modules>
   </component>
 </project>
