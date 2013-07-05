@@ -1,7 +1,7 @@
 //noinspection JSCheckFunctionSignatures
 /**
- * dv-viewport
- * https://github.com/diegovilar/dv-viewport
+ * dvViewport
+ * https://github.com/diegovilar/dvViewport
  *
  * @version 0.9.0-alpha.1
  * @license BSD

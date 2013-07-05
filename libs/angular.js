@@ -8769,9 +8769,6 @@ function $RootScopeProvider(){
        *
        */
       $digest: function() {
-          if (window.digestCount) window.digestCount++;
-          else window.digestCount = 1;
-
         var watch, value, last,
             watchers,
             asyncQueue = this.$$asyncQueue,

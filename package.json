@@ -1,15 +1,15 @@
 {
-  "name": "dv-viewport",
+  "name": "dvViewport",
   "version": "0.9.0-alpha.1",
   "description": "Viewport utilities for AngularJS",
-  "homepage": "https://github.com/diegovilar/dv-viewport",
+  "homepage": "https://github.com/diegovilar/dvViewport",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/diegovilar/dv-viewport.git"
+    "url": "https://github.com/diegovilar/dvViewport.git"
   },
   "devDependencies": {
         "grunt": "~0.4.1",
@@ -33,6 +33,6 @@
   "readmeFilename": "README.md",
   "gitHead": "59942dc1c776771948916be951a60dcd88ef9a89",
   "bugs": {
-    "url": "https://github.com/diegovilar/dv-viewport/issues"
+    "url": "https://github.com/diegovilar/dvViewport/issues"
   }
 }
