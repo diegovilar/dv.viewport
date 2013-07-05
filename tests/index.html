@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html ng-app="TestApp">
+    <head>
+        <meta charset="utf-8">
+        <title>ngc-viewport-resize Tests</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <style type="text/css">
+        </style>
+
+        <script>
+            function now() {
+                var date = new Date();
+
+                return '[' + [date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()].join('-') + '] ';
+            }
+        </script>
+
+        <script src="../libs/angular.js"></script>
+        <script src="../dist/dv-viewport.js"></script>
+        <script src="test.js"></script>
+    </head>
+
+    <body ng-controller="TestController" style="margin: 20px;">
+
+        <h2>$scope</h2>
+        <p>Last: {{ scope.last }}</p>
+        <p>Count: {{ rootScope.count }}</p>
+
+        <h2>$rootScope</h2>
+        <p>Last: {{ rootScope.last }}</p>
+        <p>Count: {{ rootScope.count }}</p>
+
+        <h2>Directive</h2>
+        <div ngc-viewport-resize="directive.onViewportResize($event, width, height, oldWidth, oldHeight, element)">
+            <p>Last: {{ directive.last }}</p>
+            <p>Count: {{ directive.count }}</p>
+            <p>New: {{ directive.width }} x {{ directive.height }}</p>
+            <p>Old: {{ directive.oldWidth }} x {{ directive.oldHeight }}</p>
+        </div>
+
+    </body>
+</html>
