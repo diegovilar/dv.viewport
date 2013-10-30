@@ -3,7 +3,7 @@
  * dv.viewport
  * https://github.com/diegovilar/dv.viewport
  *
- * @version 0.9.0-alpha.1
+ * @version 0.9.0-alpha.2
  * @license BSD
  */
 
@@ -14,7 +14,7 @@
      * @constant
      * @type {!string}
      */
-    var MODULE_NAME = 'dv.viewport';
+    var MODULE_NAME = 'dvViewport';
 
     /**
      * @constant
@@ -40,86 +40,23 @@
      */
     var DEFAULT_EVENT_DEBOUNCE_DELAY = 25;
 
+    /**
+     * @constant
+     * @type {number}
+     */
+    var DEFAULT_POOL_INTERVAL = 25;
+
+    /**
+     * @constant
+     * @type {boolean}
+     */
+    var DEFAULT_POOL_ACTIVE_CONFIGURAION = false;
+
+
+
     //noinspection JSCheckFunctionSignatures
     var module = angular.module(MODULE_NAME, []);
 
-
-
-    //region Listener setup
-    //------------------------------------------------------------------------------------------------------------------
-    //noinspection JSUnresolvedFunction
-    module.run(setupListener);
-
-    setupListener.$inject = ['dvViewport', '$window', '$rootScope'];
-
-    /**
-     *
-     * @param viewport
-     * @param $window
-     * @param $rootScope
-     */
-    function setupListener(viewport, $window, $rootScope) {
-
-        var oldWidth = viewport.getWidth(),
-            oldHeight = viewport.getHeight();
-
-        /**
-         * Creates a debouncing function that executes on the end of the delay.
-         *
-         * @param delay
-         * @param func
-         * @returns {Function}
-         */
-        function tailDebounce(delay, func) {
-            var timeout,
-                context,
-                args,
-                slice = [].slice;
-
-            function invokeFunc() {
-                func.apply(context, args)
-            }
-
-            return function() {
-                context = this;
-                args = slice.call(arguments, 0);
-
-                // We don't use $timeout because we don't want to force a $digest after every resize.
-                // For listeners of the viewportResize event, it's their responsibility to call $digest/$apply
-                // if they find it necessary, as well as come up with a strategy to do it as few times as possible,
-                // specially if there are many listeners to the event.
-                // The dv-viewport-resize directive, on the other hand, will call $apply on it's current scope
-                // automatically.
-                $window.clearTimeout(timeout);
-                timeout = $window.setTimeout(invokeFunc, delay);
-            };
-        }
-
-        //noinspection JSUnresolvedFunction,JSCheckFunctionSignatures
-        angular.element($window).bind('resize', tailDebounce(DEFAULT_EVENT_DEBOUNCE_DELAY, function() {
-
-            var width = viewport.getWidth(),
-                height = viewport.getHeight();
-
-            // Did we really get resized?
-            if (width != oldWidth || height != oldHeight) {
-                //noinspection JSUnresolvedFunction
-                $rootScope.$broadcast(
-                    RESIZE_EVENT_NAME,
-                    width,
-                    height,
-                    oldWidth,
-                    oldHeight
-                );
-
-                oldWidth = width;
-                oldHeight = height;
-            }
-        }));
-
-    }
-    //---------------------------------------------------------------------------------------------
-    //endregion
 
 
 
@@ -128,38 +65,56 @@
     //noinspection JSUnresolvedFunction
     module.directive(RESIZE_DIRECTIVE_NAME, resizeDirectiveFactory);
 
-    resizeDirectiveFactory.$inject = ['$parse'];
+    resizeDirectiveFactory.$inject = ['$parse', VIEWPORT_SERVICE_NAME];
 
     /**
      *
      * @param $parse
      * @returns {{restrict: string, link: Function}}
      */
-    function resizeDirectiveFactory($parse) {
+    function resizeDirectiveFactory($parse, viewport) {
 
         return {
             restrict: 'ACM',
 
             link: function(scope, element, attributes) {
 
-                var userListener = $parse(attributes[RESIZE_DIRECTIVE_NAME]);
+                var userHandler = $parse(attributes[RESIZE_DIRECTIVE_NAME]);
 
-                //noinspection JSUnresolvedFunction
-                scope.$on(RESIZE_EVENT_NAME, function(event, width, height, oldWidth, oldHeight) {
+                function handler(event, width, height) {
 
                     scope.$apply(function() {
                         //noinspection JSUnresolvedVariable
-                        userListener(scope, {
+                        userHandler(scope, {
                             $event: event,
                             element: element,
 
                             width: width,
                             height: height,
-
                             oldWidth: oldWidth,
                             oldHeight: oldHeight
                         });
                     });
+                }
+
+                //noinspection JSUnresolvedFunction
+                scope.$on(RESIZE_EVENT_NAME, handler);
+
+                // We always fire once when attaching
+                userHandler(scope, {
+                    $event : {
+                        name: RESIZE_EVENT_NAME,
+                        targetScope: scope,
+                        preventDefault: function() {
+                            this.defaultPrevented = true;
+                        },
+                        defaultPrevented: false
+                    },
+                    element: element,
+                    width: viewport.getWidth(),
+                    height: viewport.getHeight(),
+                    oldWidth: 0,
+                    oldHeight: 0
                 });
             }
         };
@@ -171,26 +126,133 @@
 
     //region Viewport service
     //------------------------------------------------------------------------------------------------------------------
-    module.service(VIEWPORT_SERVICE_NAME, ['$window', '$document', viewportFactory]);
+    module.provider(VIEWPORT_SERVICE_NAME, function() {
 
-    function viewportFactory($window, $document) {
+        var config = {
+            pool : DEFAULT_POOL_ACTIVE_CONFIGURAION,
+            poolInterval : DEFAULT_POOL_INTERVAL,
+            debounceDelay : DEFAULT_EVENT_DEBOUNCE_DELAY
+        };
 
-        var doc = $document[0].documentElement;
+        viewportServiceFactory.$inject = ['$window', '$document', '$rootScope', '$log'];
 
-        return {
-            getWidth : function () {
+        function viewportServiceFactory($window, $document, $rootScope, $log) {
+
+            var doc = $document[0].documentElement;
+
+            function getViewportWidth() {
                 return $window.innerWidth || doc.clientWidth;
-            },
+            }
 
-            getHeight : function getViewportHeight() {
+            function getViewportHeight() {
                 return $window.innerHeight || doc.clientHeight;
-            },
+            }
 
-            getPixelRatio : function() {
+            function getPixelRatio() {
                 return $window.devicePixelRatio || 1;
             }
+
+            /**
+             * Creates a debouncing function that executes on the end of the delay.
+             *
+             * @param delay
+             * @param func
+             * @returns {Function}
+             */
+            function tailDebounce(delay, func) {
+                var timeout,
+                    context,
+                    args,
+                    slice = [].slice;
+
+                function invokeFunc() {
+                    func.apply(context, args)
+                }
+
+                return function() {
+                    context = this;
+                    args = slice.call(arguments, 0);
+
+                    // We don't use $timeout because we don't want to force a $digest after every resize.
+                    // For listeners of the viewportResize event, it's their responsibility to call $digest/$apply
+                    // if they find it necessary, as well as come up with a strategy to do it as few times as possible,
+                    // specially if there are many listeners to the event.
+                    // The dv-viewport-resize directive, on the other hand, will call $apply on it's current scope
+                    // automatically.
+                    $window.clearTimeout(timeout);
+                    timeout = $window.setTimeout(invokeFunc, delay);
+                };
+            }
+
+            var oldWidth = getViewportWidth(),
+                oldHeight = getViewportHeight(),
+                debounceDelay = Math.abs(parseInt(config.debounceDelay, 10)) || DEFAULT_EVENT_DEBOUNCE_DELAY,
+                rootElement = angular.element($window);
+
+            //noinspection JSUnresolvedFunction,JSCheckFunctionSignatures
+            rootElement.bind('resize', tailDebounce(debounceDelay, function() {
+
+                $log.info('dvViewport: resize');
+
+                var width = getViewportWidth(),
+                    height = getViewportHeight();
+
+                // Did we really get resized?
+                if (width != oldWidth || height != oldHeight) {
+
+                    //noinspection JSUnresolvedFunction
+                    $rootScope.$broadcast(
+                        RESIZE_EVENT_NAME,
+                        width,
+                        height,
+                        oldWidth,
+                        oldHeight
+                    );
+
+                    oldWidth = width;
+                    oldHeight = height;
+                }
+            }));
+
+            if (config.pool) {
+                $log.info('dvViewport: pooling');
+                setInterval(function() {
+                    $log.info('dvViewport: pooled');
+
+                    if ((getViewportWidth() != oldWidth) || (getViewportHeight() != oldHeight)) {
+                        rootElement.triggerHandler('resize');
+                    }
+
+                }, config.poolInterval)
+            }
+
+            $log.info('dvViewport service instantiated');
+
+            // The actual service API
+            return {
+                getWidth : getViewportWidth,
+                getHeight : getViewportHeight,
+                getPixelRatio : getPixelRatio
+            };
+        }
+
+        return {
+            $get : viewportServiceFactory,
+
+            /**
+             *
+             * @param {object} configOptions
+             */
+            config : function(configOptions) {
+
+                if (angular.isObject(configOptions) && !angular.isArray(configOptions)) {
+                    angular.extend(config, angular.copy(configOptions));
+                }
+
+            }
         };
-    }
+
+    });
     //------------------------------------------------------------------------------------------------------------------
     //endregion
 
