@@ -79,6 +79,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-text-replace');
+    //grunt.loadNpmTasks('grunt-regex-replace');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('build', [
