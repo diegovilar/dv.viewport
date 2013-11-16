@@ -3,7 +3,7 @@
  * dv.viewport
  * https://github.com/diegovilar/dv.viewport
  *
- * @version 0.9.0-alpha.3
+ * @version 0.9.0-alpha.4
  * @license BSD
  */
 
@@ -71,6 +71,7 @@
      *
      * @param $parse
      * @returns {{restrict: string, link: Function}}
+     * @param viewport
      */
     function resizeDirectiveFactory($parse, viewport) {
 
@@ -129,6 +130,7 @@
     module.provider(VIEWPORT_SERVICE_NAME, function() {
 
         var config = {
+            verbose: false,
             pool : DEFAULT_POOL_ACTIVE_CONFIGURAION,
             poolInterval : DEFAULT_POOL_INTERVAL,
             debounceDelay : DEFAULT_EVENT_DEBOUNCE_DELAY
@@ -198,7 +200,7 @@
                 // Did we really get resized?
                 if (width != oldWidth || height != oldHeight) {
 
-                    $log.info('dvViewport: Viewport resized from ' + oldWidth + 'x' + oldHeight + ' to ' + width + 'x' + height + '.');
+                    config.verbose && $log.info('dvViewport: Viewport resized from ' + oldWidth + 'x' + oldHeight + ' to ' + width + 'x' + height + '.');
 
                     //noinspection JSUnresolvedFunction
                     $rootScope.$broadcast(
@@ -217,7 +219,7 @@
             // TODO Tratar poolInterval para nunca ser menor do que debounceDelay sob pena de a detecção por pooling
             // disparar infinitamente.
             if (config.pool) {
-                $log.info('dvViewport: Pooling enabled, every ' + config.poolInterval + ' milliseconds.');
+                config.verbose && $log.info('dvViewport: Pooling enabled, every ' + config.poolInterval + ' milliseconds.');
 
                 setInterval(function() {
 
@@ -225,16 +227,16 @@
                         height = getViewportHeight();
 
                     if (width != oldWidth || height != oldHeight) {
-                        $log.info('dvViewport: Resize detected by pooling. Triggering event.');
-                        //$log.info('dvViewport: Viewport resize detected by pooling from ' + oldWidth + 'x' + oldHeight + ' to ' + width + 'x' + height + '. Triggering event.');
+                        config.verbose && $log.info('dvViewport: Resize detected by pooling. Triggering event.');
+                        //config.verbose && $log.info('dvViewport: Viewport resize detected by pooling from ' + oldWidth + 'x' + oldHeight + ' to ' + width + 'x' + height + '. Triggering event.');
                         rootElement.triggerHandler('resize');
                     }
 
                 }, config.poolInterval)
             }
 
-            $log.info('dvViewport: Service instantiated.');
-            $log.info('dvViewport: Initial viewport size is ' + oldWidth + 'x' + oldHeight + '.');
+            config.verbose && $log.info('dvViewport: Service instantiated.');
+            config.verbose && $log.info('dvViewport: Initial viewport size is ' + oldWidth + 'x' + oldHeight + '.');
 
             // The actual service API
             return {

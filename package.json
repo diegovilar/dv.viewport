@@ -1,6 +1,6 @@
 {
     "name": "dv.viewport",
-    "version": "0.9.0-alpha.3",
+    "version": "0.9.0-alpha.4",
     "description": "Viewport utilities for AngularJS",
     "homepage": "https://github.com/diegovilar/dv.viewport",
     "private": true,
