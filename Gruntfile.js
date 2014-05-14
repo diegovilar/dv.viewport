@@ -1,40 +1,55 @@
+var utils = require('./build-utils');
+
 module.exports = function (grunt) {
 
-    // Force concat and other plugins to use LF always
+    var pkg = grunt.file.readJSON('package.json'),
+        srcDir = './src',
+        buildDir = './build',
+        distDir = './dist',
+        buildTime = new Date(),
+        buildTimeString = buildTime.toISOString();
+
+    var version = utils.version.parse(pkg.version),
+        versionString = utils.version.getCacheKey(version);
+
+    //noinspection JSValidateTypes
     grunt.util.linefeed = '\n';
 
+    require('load-grunt-tasks')(grunt);
+
+    //noinspection JSUnresolvedFunction
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: pkg,
 
-        buildDir: './build',
-        distDir: './dist',
-        srcDir: './src',
-
-        clean: {
-            build: [
-                "<%= buildDir %>/*",
-                "<%= distDir %>/*"
-            ]
+        version : {
+            version : version.version,
+            versionString : versionString,
+            buildTime: buildTime,
+            buildTimeString: buildTimeString
         },
 
-        // Duplicate source for following building tasks
+        srcDir: srcDir,
+        buildDir: buildDir,
+        distDir: distDir,
+
+        clean: {
+            build: [buildDir],
+            dist: [distDir]
+        },
+
         copy: {
             build: {
                 files: [
                     {expand: true, cwd: '<%= srcDir %>/', src: ['**'], dest: '<%= buildDir %>/'}
                 ]
-            },
-            dist: {
-                files: [
-                    {expand: true, cwd: '<%= buildDir %>/', src: ['**'], dest: '<%= distDir %>/'}
-                ]
             }
         },
 
-        // String replacements
         replace: {
             build: {
-                src: ['<%= buildDir %>/**/*.{js,json}'],
+                src: [
+                    '<%= buildDir %>/*.js'
+                ],
                 overwrite: true,
                 replacements: [
                     {
@@ -46,7 +61,10 @@ module.exports = function (grunt) {
                         to: "<%= pkg.homepage %>"
                     },{
                         from: "$PROJECT_VERSION$",
-                        to: "<%= pkg.version %>"
+                        to: "<%= version.versionString %>"
+                    },{
+                        from: "$PROJECT_BUILD_TIME$",
+                        to: "<%= version.buildTimeString %>"
                     },{
                         from: "$PROJECT_LICENSE$",
                         to: "<%= pkg.license %>"
@@ -55,39 +73,49 @@ module.exports = function (grunt) {
             }
         },
 
-        // Javascript compresion
         uglify: {
-            options: {
-                mangle: true,
-                compress: true,
-                preserveComments: 'some'
-            },
-
-            dist: {
+            min: {
                 options: {
-                    report: 'gzip'
+                    report: 'gzip',
+                    sourceMap: true,
+                    mangle: true,
+                    compress: {
+                        drop_console: true
+                    },
+                    preserveComments: 'some'
                 },
-                files: {
-                    '<%=distDir%>/dv-viewport.min.js': [
-                        '<%= distDir %>/dv-viewport.js'
-                    ]
+                files : {
+                    '<%= buildDir %>/dv-viewport.min.js' : ['<%= buildDir %>/dv-viewport.js']
                 }
             }
-        }
-    });
+        },
 
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-text-replace');
-    //grunt.loadNpmTasks('grunt-regex-replace');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+        compress: {
+            dist: {
+                options: {
+                    archive: '<%= distDir %>/<%= pkg.name %>-<%= version.versionString %>.zip'
+                },
+                files: [
+                    {expand: true, cwd: '<%= buildDir %>/', src: ['**']}
+                ]
+            }
+        }
+
+    });
 
     grunt.registerTask('build', [
         'clean:build',
         'copy:build',
         'replace:build',
-        'copy:dist',
-        'uglify:dist'
+        'uglify:min'
     ]);
-    grunt.registerTask('default', 'build');
+
+    grunt.registerTask('dist', [
+        'build',
+        'clean:dist',
+        'compress:dist'
+    ]);
+
+    grunt.registerTask('default', ['build']);
+
 };

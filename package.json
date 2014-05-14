@@ -1,23 +1,26 @@
 {
     "name": "dv.viewport",
-    "version": "0.9.0-alpha.4",
+    "version": "0.9.0-alpha.5",
     "description": "Viewport utilities for AngularJS",
     "homepage": "https://github.com/diegovilar/dv.viewport",
     "private": true,
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "grunt build",
+        "dist": "grunt dist"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/diegovilar/dv.viewport.git"
     },
     "devDependencies": {
-        "grunt": "~0.4.1",
-        "grunt-contrib-uglify": "~0.2.1",
-        "grunt-text-replace": "~0.3.2",
-        "grunt-regex-replace": "~0.2.5",
-        "grunt-contrib-copy": "~0.4.1",
-        "grunt-contrib-clean": "~0.4.1"
+        "semver": "~2.3.0",
+        "grunt": "~0.4.5",
+        "load-grunt-tasks": "~0.4.0",
+        "grunt-contrib-compress": "~0.8.0",
+        "grunt-contrib-uglify": "~0.4.0",
+        "grunt-text-replace": "~0.3.11",
+        "grunt-contrib-copy": "~0.5.0",
+        "grunt-contrib-clean": "~0.5.0"
     },
     "keywords": [
         "angular",

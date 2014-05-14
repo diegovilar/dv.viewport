@@ -16,3 +16,6 @@ npm-debug.log
 /build
 /.idea/workspace.xml
 /.idea/tasks.xml
+/dist
+/.idea/misc.xml
+/.idea/template

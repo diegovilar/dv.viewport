@@ -1,5 +1,4 @@
-//noinspection JSCheckFunctionSignatures
-/**
+/*!
  * $PROJECT_NAME$
  * $PROJECT_HOMEPAGE$
  *
@@ -151,6 +150,7 @@
             }
 
             function getPixelRatio() {
+                //noinspection JSUnresolvedVariable
                 return $window.devicePixelRatio || 1;
             }
 
